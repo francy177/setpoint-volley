@@ -1,0 +1,35 @@
+name: Aggiorna Dati FIPAV
+
+on:
+  schedule:
+    # Esegue lo scraper ogni giorno alle 08:00 di mattina
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Permette anche di avviarlo a mano con un click quando vuoi
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Scarica il codice del repository
+        uses: actions/checkout@v4
+
+      - name: Configura Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Installa le dipendenze
+        run: pip install requests beautifulsoup4
+
+      - name: Esegui lo scraper
+        run: python scraper.py
+
+      - name: Salva il database aggiornato su GitHub
+        run: |
+          git config --global user.name "Scraper Bot"
+          git config --global user.email "bot@github.com"
+          git add fipav.db
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Aggiornamento automatico database FIPAV" && git push)
