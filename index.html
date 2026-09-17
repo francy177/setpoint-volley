@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SetPoint | Volley FIPAV Bari-Foggia</title>
+    <!-- Font Sportivi e Moderni -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --court-base: #0b1320;
+            --court-light: #15243b;
+            --mikasa-yellow: #FFCC00;
+            --mikasa-blue: #1A56DB;
+            --taraflex-orange: #F97316;
+            --net-white: #ffffff;
+            
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            
+            --font-ui: 'Outfit', sans-serif;
+            --font-score: 'Russo One', sans-serif;
+
+            --radius-card: 16px;
+            --radius-pill: 50px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--court-base);
+            color: var(--text-main);
+            font-family: var(--font-ui);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .court-background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image: 
+                linear-gradient(to bottom, transparent 30%, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.03) 31%, transparent 31%),
+                linear-gradient(to bottom, transparent 50%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.08) 51%, transparent 51%),
+                linear-gradient(to bottom, transparent 70%, rgba(255, 255, 255, 0.03) 70%, rgba(255, 255, 255, 0.03) 71%, transparent 71%);
+        }
+
+        .bg-graphics-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .bg-silhouette {
+            position: absolute;
+            fill: var(--net-white);
+            opacity: 0.04;
+            transition: all 0.5s ease;
+        }
+
+        .bg-silhouette.spiker {
+            top: -5%;
+            right: -10%;
+            height: 75vh;
+            transform: rotate(-10deg);
+            fill: var(--mikasa-yellow);
+            opacity: 0.06;
+            filter: drop-shadow(0 0 20px rgba(255, 204, 0, 0.2));
+        }
+
+        .bg-silhouette.receiver {
+            bottom: -5%;
+            left: -5%;
+            height: 60vh;
+            fill: var(--text-dim);
+            opacity: 0.05;
+        }
+
+        .net-pattern {
+            background-image: 
+              linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 15px 15px;
+        }
+
+        header {
+            position: sticky;
+            top: 16px;
+            z-index: 1000;
+            max-width: 1200px;
+            margin: 0 auto 32px auto;
+            padding: 0 16px;
+        }
+
+        .header-island {
+            background: rgba(21, 36, 59, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 4px solid var(--mikasa-yellow);
+            border-radius: var(--radius-pill);
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .brand-pill { display: flex; align-items: center; gap: 12px; }
+        
+        .brand-icon {
+            width: 24px; height: 24px;
+            fill: var(--mikasa-yellow);
+            animation: bounce-spin 4s infinite linear;
+        }
+
+        @keyframes bounce-spin {
+            0% { transform: rotate(0deg) translateY(0); }
+            25% { transform: rotate(90deg) translateY(-3px); }
+            50% { transform: rotate(180deg) translateY(0); }
+            75% { transform: rotate(270deg) translateY(-3px); }
+            100% { transform: rotate(360deg) translateY(0); }
+        }
+
+        .brand-title { 
+            font-family: var(--font-score); 
+            font-size: 1.5rem; 
+            letter-spacing: 1px;
+            color: var(--net-white);
+        }
+
+        .sys-status { font-weight: 600; font-size: 0.8rem; color: var(--mikasa-yellow); background: rgba(255, 204, 0, 0.1); padding: 6px 14px; border-radius: var(--radius-pill); }
+
+        .bento-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 900px) { .bento-container { grid-template-columns: 1fr; } }
+
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+        .bento-card {
+            background: var(--court-light);
+            border-radius: var(--radius-card);
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            position: relative;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar .bento-card:nth-child(1) { z-index: 100; overflow: visible; }
+        .sidebar .bento-card:nth-child(2) { z-index: 90; }
+        .sidebar .bento-card:nth-child(3) { z-index: 80; }
+
+        .card-header-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--net-white);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header-icon {
+            width: 18px; height: 18px; fill: var(--mikasa-yellow);
+        }
+
+        .custom-select-wrapper { position: relative; width: 100%; }
+
+        .select-trigger {
+            width: 100%; padding: 14px 18px; font-weight: 600; font-size: 0.95rem;
+            border: 2px solid rgba(255, 255, 255, 0.05); border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3); color: var(--net-white);
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.2s;
+        }
+
+        .select-trigger:hover { border-color: var(--mikasa-yellow); background: rgba(255, 204, 0, 0.05); }
+
+        .select-arrow {
+            width: 14px; height: 14px; fill: var(--mikasa-yellow); transition: transform 0.3s;
+        }
+        .custom-select-wrapper.open .select-arrow { transform: rotate(180deg); }
+
+        .select-menu {
+            position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+            background: var(--court-base); border: 2px solid var(--mikasa-yellow);
+            border-radius: 12px; display: none; max-height: 260px; overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9); padding: 10px; z-index: 9999;
+        }
+
+        .custom-select-wrapper.open .select-menu { display: block; }
+
+        .select-search {
+            width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5); color: var(--text-main);
+            font-family: var(--font-ui); outline: none; margin-bottom: 8px; font-size: 0.9rem;
+        }
+
+        .select-option {
+            padding: 12px 14px; font-size: 0.9rem; font-weight: 600; border-radius: 8px;
+            cursor: pointer; color: var(--text-dim); transition: all 0.15s;
+        }
+
+        .select-option:hover, .select-option.selected { background: var(--mikasa-blue); color: var(--net-white); }
+
+        .search-input {
+            width: 100%; padding: 14px 18px; font-size: 0.95rem; font-weight: 600;
+            border: 2px solid rgba(255, 255, 255, 0.05); border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3); color: var(--net-white); outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: var(--mikasa-yellow); }
+
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .metric-tile { background: rgba(0, 0, 0, 0.2); border-radius: 12px; padding: 16px; text-align: center; border-bottom: 3px solid var(--mikasa-blue); }
+        .metric-val { font-family: var(--font-score); font-size: 1.8rem; color: var(--net-white); }
+        .metric-lbl { font-size: 0.75rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; margin-top: 4px; }
+
+        .segmented-control { display: flex; gap: 8px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: var(--radius-pill); margin-bottom: 24px; }
+        .segment-btn { 
+            flex: 1; padding: 12px; border: none; background: transparent; color: var(--text-dim); 
+            border-radius: var(--radius-pill); cursor: pointer; font-weight: 800; font-size: 0.9rem; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;
+        }
+        .segment-btn svg { width: 16px; height: 16px; fill: currentColor; }
+        .segment-btn.active { background: var(--mikasa-blue); color: var(--net-white); box-shadow: 0 4px 12px rgba(26, 86, 219, 0.4); }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { font-size: 0.75rem; font-weight: 800; color: var(--text-dim); padding: 14px; text-align: left; text-transform: uppercase; border-bottom: 2px solid rgba(255,255,255,0.05); }
+        td { padding: 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); font-weight: 600; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+        
+        .rank-num { font-family: var(--font-score); font-size: 1.2rem; color: var(--text-dim); width: 50px; text-align: center; }
+        tr:nth-child(1) .rank-num { color: var(--mikasa-yellow); font-size: 1.5rem; }
+        tr:nth-child(2) .rank-num { color: #cbd5e1; }
+        tr:nth-child(3) .rank-num { color: #d97706; }
+        
+        .pts-cell { font-family: var(--font-score); font-size: 1.2rem; color: var(--net-white); text-align: right; }
+
+        .round-header { 
+            font-family: var(--font-score); font-size: 1rem; color: var(--mikasa-yellow); 
+            margin: 32px 0 16px 0; display: flex; align-items: center; gap: 12px; 
+        }
+        .round-header::after { content: ''; flex: 1; height: 2px; background: linear-gradient(to right, var(--mikasa-yellow), transparent); }
+        
+        .match-card-sport { 
+            background: linear-gradient(145deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6));
+            border-left: 4px solid var(--mikasa-blue);
+            border-radius: 12px; padding: 16px; margin-bottom: 16px; 
+            display: flex; flex-direction: column; gap: 12px;
+            position: relative; overflow: hidden;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .match-meta { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; }
+        
+        .match-teams-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; }
+        .team-title { font-size: 1rem; font-weight: 600; color: var(--text-dim); }
+        .team-title.home { text-align: right; }
+        .team-title.winner { color: var(--net-white); font-weight: 800; }
+        
+        .score-board { 
+            background: #000; border: 2px solid #222; border-radius: 8px; 
+            padding: 8px 16px; font-family: var(--font-score); font-size: 1.4rem; 
+            color: var(--taraflex-orange); letter-spacing: 2px; text-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+            min-width: 90px; text-align: center;
+        }
+        .score-board.pending { color: #444; font-family: var(--font-ui); font-size: 0.8rem; letter-spacing: 0; text-shadow: none; font-weight: 800; }
+        
+        .partials-info { font-size: 0.75rem; font-weight: 600; color: var(--text-dim); text-align: center; letter-spacing: 1px; }
+
+        .status-empty { text-align: center; padding: 24px; font-weight: 600; color: var(--text-dim); font-size: 0.9rem; }
+        
+        .volley-loader {
+            width: 40px; height: 40px; margin: 40px auto; display: block;
+            fill: var(--mikasa-yellow); animation: spin 1s infinite linear;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="court-background"></div>
+
+    <div class="bg-graphics-container">
+        <svg class="bg-silhouette spiker" viewBox="0 0 512 512">
+            <circle cx="120" cy="80" r="35" />
+            <path d="M246.5,75.1c-15.6,8.7-25.9,24.5-27.4,42.5c-1.3,15.6,5.3,29.9,15.8,39.9l-19.1,51.8L121.6,128 l-20.9,18.8l93.7,85.2l-23.7,64.2l-37.4-44.5l-26.6,14.4l49.8,63.4c5.8,7.3,14,12.5,23.3,14.4c9.3,1.9,18.9,0.3,27.1-4.7l64.3-39 l59.3,86.6l23.5-16.1l-65.7-96l7.8-19.7l65.8,11.2l4.8-28.5L259,219l17.2-46.7c2.6-7,8.2-12.4,15.1-14.7l69.5-23.6l-9.2-27.1 L282.1,130c-5.7-4.4-12.1-10.2-16.8-17.7c-4.3-6.8-6.1-14.6-5.2-22.1C260.9,83,264,75.8,269,70L246.5,75.1z" />
+        </svg>
+        
+        <svg class="bg-silhouette receiver" viewBox="0 0 512 512">
+            <circle cx="400" cy="120" r="30" />
+            <path d="M305,274.6c11.8-6.9,27-2.9,33.9,8.9c6.9,11.8,2.9,27-8.9,33.9L242.3,368l33.2,56.6l-24.6,14.4 l-40.4-68.9l-43,45.4L153.9,503l-28.3-4.5l14.4-90.8c1.5-9.6,7-17.9,15.1-22.7L226.7,342l-41.2-70.3l-55.7,21l-10-26.6l69-26.1 c8.9-3.4,18.9-2.1,26.7,3.5l36.5,26.3l43.2-25.3C298.5,242.1,301.2,258,305,274.6z M265.8,141.2c16-9.4,36.5-4,45.9,12 c9.4,16,4,36.5-12,45.9c-16,9.4-36.5,4-45.9-12C244.4,171.1,249.8,150.6,265.8,141.2z" />
+        </svg>
+    </div>
+
+    <header>
+        <div class="header-island net-pattern">
+            <div class="brand-pill">
+                <svg class="brand-icon" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                    <path d="M2 12h20" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                </svg>
+                <div class="brand-title">SETPOINT</div>
+            </div>
+            <div class="sys-status">FIPAV BARI-FOGGIA</div>
+        </div>
+    </header>
+
+    <div class="bento-container">
+        
+        <aside class="sidebar">
+            <div class="bento-card net-pattern">
+                <div class="card-header-label">
+                    <svg class="card-header-icon" viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 15.9V19H7v2h10v-2h-4v-3.1a5.01 5.01 0 0 0 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM7 10.82C5.84 10.4 5 9.3 5 8V7h2v3.82zM19 8c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
+                    Campionato
+                </div>
+                <div class="custom-select-wrapper" id="dropdown-campionato">
+                    <div class="select-trigger" onclick="toggleDropdown(event)" id="selected-campionato-label">
+                        <span>Seleziona Torneo...</span>
+                        <svg class="select-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+                    </div>
+                    <div class="select-menu" id="select-menu-box">
+                        <input type="text" class="select-search" id="search-campionato-input" placeholder="Cerca competizione..." onkeyup="filtraCampionati(event)" autocomplete="off">
+                        <div id="dropdown-options">
+                            <div class="select-option">In attesa dei dati...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-card net-pattern">
+                <div class="card-header-label">
+                    <svg class="card-header-icon" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
+                    Filtra Squadra
+                </div>
+                <input type="text" id="search-input" class="search-input" placeholder="Es. Polignano, Foggia..." onkeyup="filtraSquadre()">
+            </div>
+
+            <div class="bento-card">
+                <div class="card-header-label">
+                    <svg class="card-header-icon" viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/></svg>
+                    Statistiche
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-tile">
+                        <div class="metric-val" id="stat-campionati">-</div>
+                        <div class="metric-lbl">Tornei Attivi</div>
+                    </div>
+                    <div class="metric-tile">
+                        <div class="metric-val" id="stat-giocate">-</div>
+                        <div class="metric-lbl">Gare Giocate</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main>
+            <div class="segmented-control">
+                <button class="segment-btn active" onclick="switchTab('home')">
+                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Overview
+                </button>
+                <button class="segment-btn" onclick="switchTab('classifica')">
+                    <svg viewBox="0 0 24 24"><path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/></svg> Classifica
+                </button>
+                <button class="segment-btn" onclick="switchTab('partite')">
+                    <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg> Calendario
+                </button>
+            </div>
+
+            <!-- TAB 1: OVERVIEW -->
+            <div id="tab-home" class="tab-panel active">
+                <div class="bento-card" style="margin-bottom: 24px;">
+                    <div class="card-header-label">
+                        <svg class="card-header-icon" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm1-13h-2v6l5.2 3.1.8-1.2-4.5-2.7z"/></svg>
+                        Ultimi Risultati
+                    </div>
+                    <div id="container-home-recenti">
+                        <div class="status-empty">Seleziona un torneo dal menu a sinistra...</div>
+                    </div>
+                </div>
+
+                <div class="bento-card">
+                    <div class="card-header-label">
+                        <svg class="card-header-icon" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/></svg>
+                        Prossimi Incontri
+                    </div>
+                    <div id="container-home-prossimi">
+                        <div class="status-empty">Seleziona un torneo dal menu a sinistra...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: CLASSIFICA -->
+            <div id="tab-classifica" class="tab-panel">
+                <div class="bento-card" style="padding: 12px 24px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>Squadra</th>
+                                <th style="text-align: right;">Punti</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-classifica">
+                            <tr><td colspan="3" class="status-empty">Nessun torneo selezionato.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: CALENDARIO -->
+            <div id="tab-partite" class="tab-panel">
+                <div id="container-partite">
+                    <div class="bento-card status-empty">Nessun torneo selezionato.</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <template id="loader-template">
+        <svg class="volley-loader" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10" fill="none" stroke="currentColor" stroke-width="2"/>
+            <path d="M2 12h20" fill="none" stroke="currentColor" stroke-width="2"/>
+        </svg>
+    </template>
+
+    <script>
+        const API_URL = "https://setpoint-volley.onrender.com/";
+        let partiteCache = [];
+        let campionatiCache = [];
+        let campionatoSelezionatoId = null;
+
+        function getLoaderHTML() {
+            return document.getElementById('loader-template').innerHTML;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.segment-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+            if (tabName === 'home') {
+                document.querySelectorAll('.segment-btn')[0].classList.add('active');
+                document.getElementById('tab-home').classList.add('active');
+            } else if (tabName === 'classifica') {
+                document.querySelectorAll('.segment-btn')[1].classList.add('active');
+                document.getElementById('tab-classifica').classList.add('active');
+            } else {
+                document.querySelectorAll('.segment-btn')[2].classList.add('active');
+                document.getElementById('tab-partite').classList.add('active');
+            }
+        }
+
+        function toggleDropdown(event) {
+            if (event) event.stopPropagation();
+            const wrapper = document.getElementById("dropdown-campionato");
+            const isOpen = wrapper.classList.contains("open");
+            
+            if (isOpen) {
+                wrapper.classList.remove("open");
+            } else {
+                wrapper.classList.add("open");
+                setTimeout(() => document.getElementById("search-campionato-input").focus(), 50);
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            const wrapper = document.getElementById("dropdown-campionato");
+            if (wrapper && !wrapper.contains(e.target)) {
+                wrapper.classList.remove("open");
+            }
+        });
+
+        async function caricaCampionati() {
+            try {
+                const res = await fetch(`${API_URL}/campionati`);
+                campionatiCache = await res.json();
+                document.getElementById("stat-campionati").innerText = campionatiCache.length;
+                renderOpzioniCampionati(campionatiCache);
+            } catch (e) {
+                console.error("Errore API:", e);
+                document.getElementById("dropdown-options").innerHTML = '<div class="select-option">Errore Server</div>';
+            }
+        }
+
+        function renderOpzioniCampionati(lista) {
+            const container = document.getElementById("dropdown-options");
+            container.innerHTML = "";
+
+            if (lista.length === 0) {
+                container.innerHTML = '<div class="select-option">Nessun torneo trovato.</div>';
+                return;
+            }
+
+            lista.forEach(c => {
+                const div = document.createElement("div");
+                div.className = "select-option" + (c.id === campionatoSelezionatoId ? " selected" : "");
+                div.innerText = c.nome;
+                div.onclick = (e) => {
+                    e.stopPropagation();
+                    selezionaCampionato(c.id, c.nome);
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function filtraCampionati(event) {
+            if (event) event.stopPropagation();
+            const q = document.getElementById("search-campionato-input").value.toLowerCase();
+            const filtrate = campionatiCache.filter(c => c.nome.toLowerCase().includes(q));
+            renderOpzioniCampionati(filtrate);
+        }
+
+        function selezionaCampionato(id, nome) {
+            campionatoSelezionatoId = id;
+            document.getElementById("selected-campionato-label").querySelector("span").innerText = nome;
+            document.getElementById("dropdown-campionato").classList.remove("open");
+            caricaDati(id);
+        }
+
+        async function caricaDati(id) {
+            const tbody = document.getElementById("tbody-classifica");
+            const containerPartite = document.getElementById("container-partite");
+            const containerHomeRecenti = document.getElementById("container-home-recenti");
+            const containerHomeProssimi = document.getElementById("container-home-prossimi");
+
+            const loader = `<tr><td colspan="3">${getLoaderHTML()}</td></tr>`;
+            tbody.innerHTML = loader;
+            containerPartite.innerHTML = getLoaderHTML();
+            containerHomeRecenti.innerHTML = getLoaderHTML();
+            containerHomeProssimi.innerHTML = getLoaderHTML();
+
+            try {
+                const res = await fetch(`${API_URL}/campionato/${id}`);
+                const data = await res.json();
+                partiteCache = data.partite;
+
+                const giocateCount = partiteCache.filter(p => p.risultato && p.risultato.includes("-") && p.risultato !== "N/D").length;
+                document.getElementById("stat-giocate").innerText = giocateCount;
+
+                tbody.innerHTML = "";
+                if (data.classifica.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="status-empty">Classifica non ancora pubblicata dal Comitato.</td></tr>';
+                } else {
+                    data.classifica.forEach(c => {
+                        tbody.innerHTML += `
+                            <tr class="row-squadra" data-squadra="${c.squadra.toLowerCase()}">
+                                <td class="rank-num">${c.pos}°</td>
+                                <td>${c.squadra}</td>
+                                <td class="pts-cell">${c.punti}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                renderPartite(partiteCache);
+                renderHomeRecenti(partiteCache);
+
+            } catch (e) {
+                console.error("Errore caricamento dati:", e);
+            }
+        }
+
+        function renderHomeRecenti(listaPartite) {
+            const containerRecenti = document.getElementById("container-home-recenti");
+            const containerProssimi = document.getElementById("container-home-prossimi");
+            
+            containerRecenti.innerHTML = "";
+            containerProssimi.innerHTML = "";
+
+            const giocate = listaPartite.filter(p => p.risultato && p.risultato.includes("-") && p.risultato !== "N/D");
+            const ultimeGiocate = giocate.slice(-4).reverse();
+
+            if (ultimeGiocate.length === 0) {
+                containerRecenti.innerHTML = '<div class="status-empty">Nessun match disputato di recente.</div>';
+            } else {
+                ultimeGiocate.forEach(p => containerRecenti.innerHTML += generaCardMatch(p));
+            }
+
+            const daGiocare = listaPartite.filter(p => !p.risultato || p.risultato === "Da Giocare" || p.risultato === "N/D");
+            const prossimeGare = daGiocare.slice(0, 4);
+
+            if (prossimeGare.length === 0) {
+                containerProssimi.innerHTML = '<div class="status-empty">Nessun incontro in programma a breve.</div>';
+            } else {
+                prossimeGare.forEach(p => containerProssimi.innerHTML += generaCardMatch(p));
+            }
+        }
+
+        function renderPartite(listaPartite) {
+            const containerPartite = document.getElementById("container-partite");
+            containerPartite.innerHTML = "";
+
+            if (listaPartite.length === 0) {
+                containerPartite.innerHTML = '<div class="bento-card status-empty">Nessun incontro a calendario.</div>';
+                return;
+            }
+
+            let giornataCorrente = "";
+            let htmlBuffer = "";
+
+            listaPartite.forEach(p => {
+                if (p.giornata !== giornataCorrente) {
+                    if (giornataCorrente !== "") htmlBuffer += `</div>`;
+                    giornataCorrente = p.giornata;
+                    htmlBuffer += `<div class="round-block"><div class="round-header">${giornataCorrente}</div>`;
+                }
+                htmlBuffer += generaCardMatch(p);
+            });
+
+            if (giornataCorrente !== "") htmlBuffer += `</div>`;
+            containerPartite.innerHTML = htmlBuffer;
+        }
+
+        function generaCardMatch(p) {
+            let casaWinner = "", ospiteWinner = "";
+            if (p.risultato && p.risultato.includes("-") && p.risultato !== "N/D") {
+                const parts = p.risultato.split("-");
+                if (parseInt(parts[0]) > parseInt(parts[1])) casaWinner = "winner";
+                else if (parseInt(parts[1]) > parseInt(parts[0])) ospiteWinner = "winner";
+            }
+
+            const isPlayed = p.risultato && p.risultato !== "Da Giocare" && p.risultato !== "N/D";
+            const scoreClass = isPlayed ? "score-board" : "score-board pending";
+            const displayScore = isPlayed ? p.risultato : "VS";
+
+            return `
+                <div class="match-card-sport">
+                    <div class="match-meta">
+                        <span>Gara #${p.numero_gara || '-'}</span>
+                        <span>${p.data_ora || ''}</span>
+                    </div>
+                    <div class="match-teams-grid">
+                        <div class="team-title home ${casaWinner}">${p.squadra_casa}</div>
+                        <div class="${scoreClass}">${displayScore}</div>
+                        <div class="team-title away ${ospiteWinner}">${p.squadra_ospite}</div>
+                    </div>
+                    ${p.parziali ? `<div class="partials-info">SET: ${p.parziali}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function filtraSquadre() {
+            const query = document.getElementById("search-input").value.toLowerCase();
+            document.querySelectorAll(".row-squadra").forEach(riga => {
+                riga.style.display = riga.getAttribute("data-squadra").includes(query) ? "" : "none";
+            });
+            renderPartite(partiteCache.filter(p => 
+                p.squadra_casa.toLowerCase().includes(query) || p.squadra_ospite.toLowerCase().includes(query)
+            ));
+        }
+
+        caricaCampionati();
+    </script>
+</body>
+</html>
